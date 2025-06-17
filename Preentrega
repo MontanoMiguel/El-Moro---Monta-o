@@ -1,5 +1,4 @@
-CREATE TABLE Productos (
-    ID_Producto INT PRIMARY KEY,
+CREATE TABLE Productos (ID_Producto INT PRIMARY KEY,
     Nombre VARCHAR(100),
     Categoría VARCHAR(50),
     Precio DECIMAL(10,2),
@@ -8,24 +7,21 @@ CREATE TABLE Productos (
     FOREIGN KEY (ID_Proveedor) REFERENCES Proveedores(ID_Proveedor)
 );
 
-CREATE TABLE Clientes (
-    ID_Cliente INT PRIMARY KEY,
+CREATE TABLE Clientes (ID_Cliente INT PRIMARY KEY,
     Nombre VARCHAR(100),
     Teléfono VARCHAR(20),
     Email VARCHAR(100) UNIQUE,
     Dirección VARCHAR(200)
 );
 
-CREATE TABLE Ventas (
-    ID_Venta INT PRIMARY KEY,
+CREATE TABLE Ventas (ID_Venta INT PRIMARY KEY,
     Fecha DATETIME,
     ID_Cliente INT,
     Total DECIMAL(10,2),
     FOREIGN KEY (ID_Cliente) REFERENCES Clientes(ID_Cliente)
 );
 
-CREATE TABLE Detalle_Venta (
-    ID_Detalle INT PRIMARY KEY,
+CREATE TABLE Detalle_Venta (ID_Detalle INT PRIMARY KEY,
     ID_Venta INT,
     ID_Producto INT,
     Cantidad INT,
@@ -34,8 +30,7 @@ CREATE TABLE Detalle_Venta (
     FOREIGN KEY (ID_Producto) REFERENCES Productos(ID_Producto)
 );
 
-CREATE TABLE Proveedores (
-    ID_Proveedor INT PRIMARY KEY,
+CREATE TABLE Proveedores (ID_Proveedor INT PRIMARY KEY,
     Nombre VARCHAR(100),
     Teléfono VARCHAR(20),
     Email VARCHAR(100) UNIQUE
