@@ -1,41 +1,41 @@
-CREATE SCHEMA SistemaVentas;
+CREATE SCHEMA SistemaVenta;
 
-USE SistemaVentas;
+USE SistemaVenta;
 
-CREATE TABLE SistemaVentas.Productos (ID_Producto INT PRIMARY KEY,
+CREATE TABLE SistemaVenta.Producto (ID_Producto INT PRIMARY KEY,
     Nombre VARCHAR(100),
     Categoría VARCHAR(50),
     Precio DECIMAL(10,2),
     Stock INT,
     ID_Proveedor INT,
-    FOREIGN KEY (ID_Proveedor) REFERENCES SistemaVentas.Proveedores(ID_Proveedor)
+    FOREIGN KEY (ID_Proveedor) REFERENCES SistemaVenta.Proveedore(ID_Proveedor)
 );
 
-CREATE TABLE SistemaVentas.Clientes (ID_Cliente INT PRIMARY KEY,
+CREATE TABLE SistemaVenta.Cliente (ID_Cliente INT PRIMARY KEY,
     Nombre VARCHAR(100),
     Teléfono VARCHAR(20),
     Email VARCHAR(100) UNIQUE,
     Dirección VARCHAR(200)
 );
 
-CREATE TABLE SistemaVentas.Proveedores (ID_Proveedor INT PRIMARY KEY,
+CREATE TABLE SistemaVenta.Proveedore (ID_Proveedor INT PRIMARY KEY,
     Nombre VARCHAR(100),
     Teléfono VARCHAR(20),
     Email VARCHAR(100) UNIQUE
 );
 
-CREATE TABLE SistemaVentas.Ventas (ID_Venta INT PRIMARY KEY,
+CREATE TABLE SistemaVenta.Venta (ID_Venta INT PRIMARY KEY,
     Fecha DATETIME,
     ID_Cliente INT,
     Total DECIMAL(10,2),
-    FOREIGN KEY (ID_Cliente) REFERENCES SistemaVentas.Clientes(ID_Cliente)
+    FOREIGN KEY (ID_Cliente) REFERENCES SistemaVenta.Cliente(ID_Cliente)
 );
 
-CREATE TABLE SistemaVentas.Detalle_Venta (ID_Detalle INT PRIMARY KEY,
+CREATE TABLE SistemaVenta.Detalle_Venta (ID_Detalle INT PRIMARY KEY,
     ID_Venta INT,
     ID_Producto INT,
     Cantidad INT,
     Subtotal DECIMAL(10,2),
-    FOREIGN KEY (ID_Venta) REFERENCES SistemaVentas.Ventas(ID_Venta),
-    FOREIGN KEY (ID_Producto) REFERENCES SistemaVentas.Productos(ID_Producto)
+    FOREIGN KEY (ID_Venta) REFERENCES SistemaVenta.Venta(ID_Venta),
+    FOREIGN KEY (ID_Producto) REFERENCES SistemaVenta.Producto(ID_Producto)
 );
