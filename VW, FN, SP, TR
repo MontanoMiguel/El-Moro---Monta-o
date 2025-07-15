@@ -77,3 +77,71 @@ BEGIN
     RETURN ISNULL(@StockActual, 0)
 END;
 
+USE SistemaVenta;
+GO
+
+CREATE PROCEDURE RegistrarVentaCompleta
+    @ID_Venta INT,
+    @Fecha DATETIME,
+    @ID_Cliente INT,
+    @Total DECIMAL(10,2),
+    @ID_Producto INT,
+    @Cantidad INT,
+    @Subtotal DECIMAL(10,2)
+AS
+BEGIN
+    INSERT INTO Venta (ID_Venta, Fecha, ID_Cliente, Total)
+    VALUES (@ID_Venta, @Fecha, @ID_Cliente, @Total);
+
+    INSERT INTO Detalle_Venta (ID_Detalle, ID_Venta, ID_Producto, Cantidad, Subtotal)
+    VALUES (@ID_Venta, @ID_Venta, @ID_Producto, @Cantidad, @Subtotal); -- ID_Detalle = ID_Venta para simplificar
+END;
+
+USE SistemaVenta;
+GO
+
+CREATE PROCEDURE TotalVendidoPorCategoria
+    @Categoria VARCHAR(50)
+AS
+BEGIN
+    SELECT 
+        @Categoria AS Categoria,
+        SUM(DV.Subtotal) AS TotalVendido
+    FROM Detalle_Venta DV
+    INNER JOIN Producto P ON DV.ID_Producto = P.ID_Producto
+    WHERE P.Categoría = @Categoria;
+END;
+
+USE SistemaVenta;
+GO
+
+CREATE TRIGGER ActualizarStockTrasVenta
+ON Detalle_Venta
+AFTER INSERT
+AS
+BEGIN
+    UPDATE Producto
+    SET Stock = Stock - i.Cantidad
+    FROM Producto P
+    INNER JOIN inserted i ON P.ID_Producto = i.ID_Producto;
+END;
+
+USE SistemaVenta;
+GO
+
+CREATE TRIGGER ControlEmailProveedor
+ON Proveedor
+FOR INSERT, UPDATE
+AS
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM inserted
+        WHERE Email IS NULL OR Email NOT LIKE '%@%'
+    )
+    BEGIN
+        RAISERROR ('Todos los proveedores deben tener un email válido con "@"', 16, 1);
+        ROLLBACK TRANSACTION;
+    END
+END;
+
