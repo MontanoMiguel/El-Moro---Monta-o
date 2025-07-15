@@ -1,4 +1,4 @@
-CREATE SCHEMA IF NOT EXISTS SistemaVenta;
+CREATE SCHEMA SistemaVenta;
 USE SistemaVenta;
 
 CREATE TABLE Proveedor (
