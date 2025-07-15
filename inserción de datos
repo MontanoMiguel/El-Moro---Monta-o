@@ -1,0 +1,59 @@
+INSERT INTO SistemaVenta.Proveedor (ID_Proveedor, Nombre, Teléfono, Email) VALUES
+(1, 'Taller Jujuy', '1111-1111', 'jujuy@proveedor.com'),
+(2, 'Taller Salta', '2222-2222', 'salta@proveedor.com'),
+(3, 'Taller San Luis', '3333-3333', 'sanluis@proveedor.com'),
+(4, 'Taller Tucuman', '4444-4444', 'tucuman@proveedor.com'),
+(5, 'Taller La Rioja', '5555-5555', 'larioja@proveedor.com'),
+(6, 'Taller Formaosa', '6666-6666', 'formosa@proveedor.com'),
+(7, 'Mamani', '7777-7777', 'mamani@proveedor.com'),
+(8, 'Tienda Quebracho', '8888-8888', 'quebracho@proveedor.com'),
+(9, 'Comercial Andina', '9999-9999', 'andina@proveedor.com'),
+(10, 'Proveedor Barro', '1010-1010', 'barro@proveedor.com');
+
+INSERT INTO SistemaVenta.Cliente (ID_Cliente, Nombre, Teléfono, Email, Dirección) VALUES
+(1, 'Juan Pérez', '1515-1515', 'juan@example.com', 'Calle 1 #100'),
+(2, 'Ana Gómez', '2525-2525', 'ana@example.com', 'Calle 2 #200'),
+(3, 'Carlos López', '3535-3535', 'carlos@example.com', 'Calle 3 #300'),
+(4, 'Laura Díaz', '4545-4545', 'laura@example.com', 'Calle 4 #400'),
+(5, 'Pedro Sánchez', '5555-5555', 'pedro@example.com', 'Calle 5 #500'),
+(6, 'Sofía Morales', '6565-6565', 'sofia@example.com', 'Calle 6 #600'),
+(7, 'Martín Torres', '7575-7575', 'martin@example.com', 'Calle 7 #700'),
+(8, 'Elena Ruiz', '8585-8585', 'elena@example.com', 'Calle 8 #800'),
+(9, 'Diego Castro', '9595-9595', 'diego@example.com', 'Calle 9 #900'),
+(10, 'Valeria Silva', '1060-1060', 'valeria@example.com', 'Calle 10 #1000');
+
+INSERT INTO SistemaVenta.Producto (ID_Producto, Nombre, Categoría, Precio, Stock, ID_Proveedor) VALUES
+(1, 'Olla grande', 'Olla', 75000.00, 20, 1),
+(2, 'Pava mediana', 'Pava', 80000.00, 50, 2),
+(3, 'Olla pescado', 'Olla', 55000.00, 15, 3),
+(4, 'Pizera', 'Fuente', 45000.00, 40, 4),
+(5, 'Bowl', 'Plato', 6000.00, 30, 5),
+(6, 'Plato playo', 'Plato', 9000.00, 10, 6),
+(7, 'Bandeja horno', 'Fuente', 30000.00, 25, 7),
+(8, 'Bandeja tallada', 'Fuente', 25000.00, 35, 8),
+(9, 'Olla chica', 'Olla', 65000.00, 20, 9),
+(10, 'Sopera', 'Olla', 120000.00, 12, 10);
+
+INSERT INTO SistemaVenta.Venta (ID_Venta, Fecha, ID_Cliente, Total) VALUES
+(1, '2025-07-14 10:00:00', 1, 75000.00),
+(2, '2025-07-14 10:30:00', 2, 17000.00),
+(3, '2025-07-14 11:00:00', 3, 60000.00),
+(4, '2025-07-14 11:30:00', 4, 120000.00),
+(5, '2025-07-14 12:00:00', 5, 40000.00),
+(6, '2025-07-14 12:30:00', 6, 25000.00),
+(7, '2025-07-14 13:00:00', 7, 95000.00),
+(8, '2025-07-14 13:30:00', 8, 80000.00),
+(9, '2025-07-14 14:00:00', 9, 30000.00),
+(10, '2025-07-14 14:30:00', 10, 45000.00);
+
+INSERT INTO SistemaVenta.Detalle_Venta (ID_Detalle, ID_Venta, ID_Producto, Cantidad, Subtotal) VALUES
+(1, 1, 1, 1, 75000.00),
+(2, 2, 2, 2, 160000.00),
+(3, 2, 4, 1, 45000.00),
+(4, 3, 5, 1, 12000.00),
+(5, 4, 10, 1, 120000.00),
+(6, 5, 7, 1, 30000.00),
+(7, 6, 3, 1, 55000.00),
+(8, 7, 8, 1, 50000.00),
+(9, 8, 2, 1, 80000.00),
+(10, 9, 6, 1, 18000.00);
