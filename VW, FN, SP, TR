@@ -1,0 +1,79 @@
+SELECT * FROM VentaDetallada;
+CREATE VIEW SistemaVenta.VentaDetallada AS
+SELECT
+    V.ID_Venta,
+    V.Fecha,
+    C.Nombre AS Nombre_Cliente,
+    C.Email AS Email_Cliente,
+    P.Nombre AS Producto,
+    P.Categoría,
+    DV.Cantidad,
+    DV.Subtotal,
+    V.Total
+FROM SistemaVenta.Venta V
+JOIN SistemaVenta.Cliente C ON V.ID_Cliente = C.ID_Cliente
+JOIN SistemaVenta.Detalle_Venta DV ON V.ID_Venta = DV.ID_Venta
+JOIN SistemaVenta.Producto P ON DV.ID_Producto = P.ID_Producto
+WHERE P.Categoría IN ('Olla', 'Fuente', 'Plato')
+ORDER BY V.Fecha DESC;
+
+SELECT * FROM StockBajo;
+CREATE VIEW SistemaVenta.StockBajo AS
+SELECT
+    P.ID_Producto,
+    P.Nombre,
+    P.Categoría,
+    P.Stock,
+    PR.Nombre AS Proveedor,
+    PR.Email AS Email_Proveedor
+FROM SistemaVenta.Producto P
+JOIN SistemaVenta.Proveedor PR ON P.ID_Proveedor = PR.ID_Proveedor
+WHERE P.Stock < 5
+ORDER BY P.Stock ASC;
+
+SELECT * FROM VentaPorProducto;
+CREATE VIEW SistemaVenta.VentaPorProducto AS
+SELECT
+    P.ID_Producto,
+    P.Nombre,
+    P.Categoría,
+    SUM(DV.Cantidad) AS UnidadesVendidas,
+    SUM(DV.Subtotal) AS TotalFacturado,
+    PR.Nombre AS Proveedor
+FROM SistemaVenta.Detalle_Venta DV
+JOIN SistemaVenta.Producto P ON DV.ID_Producto = P.ID_Producto
+JOIN SistemaVenta.Proveedor PR ON P.ID_Proveedor = PR.ID_Proveedor
+GROUP BY P.ID_Producto, P.Nombre, P.Categoría, PR.Nombre
+ORDER BY TotalFacturado DESC;
+
+CREATE SCHEMA SistemaVenta;
+USE SistemaVenta;
+SELECT SistemaVenta.TotalVentaPorCliente(3) AS TotalFacturado;
+CREATE FUNCTION SistemaVenta.TotalVentaPorCliente (@ID_Cliente INT)
+RETURNS DECIMAL(10,2)
+AS
+BEGIN
+    DECLARE @Total DECIMAL(10,2)
+
+    SELECT @Total = SUM(V.Total)
+    FROM SistemaVenta.Venta V
+    WHERE V.ID_Cliente = @ID_Cliente
+
+    RETURN ISNULL(@Total, 0)
+END;
+
+
+SELECT SistemaVenta.StockDeProducto(6) AS StockDisponible;
+CREATE FUNCTION SistemaVenta.StockDeProducto (@ID_Producto INT)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @StockActual INT
+
+    SELECT @StockActual = P.Stock
+    FROM SistemaVenta.Producto P
+    WHERE P.ID_Producto = @ID_Producto
+
+    RETURN ISNULL(@StockActual, 0)
+END;
+
