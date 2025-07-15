@@ -1,45 +1,45 @@
-CREATE SCHEMA SistemaVenta;
+CREATE SCHEMA IF NOT EXISTS SistemaVenta;
 USE SistemaVenta;
 
-CREATE TABLE SistemaVenta.Proveedor (
-    ID_Proveedor INT PRIMARY KEY,
-    Nombre VARCHAR(100),
-    Teléfono VARCHAR(20),
+CREATE TABLE Proveedor (
+    ID_Proveedor INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre VARCHAR(100) NOT NULL,
+    Telefono VARCHAR(20),
     Email VARCHAR(100) UNIQUE
 );
 
-CREATE TABLE SistemaVenta.Cliente (
-    ID_Cliente INT PRIMARY KEY,
-    Nombre VARCHAR(100),
-    Teléfono VARCHAR(20),
+CREATE TABLE Cliente (
+    ID_Cliente INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre VARCHAR(100) NOT NULL,
+    Telefono VARCHAR(20),
     Email VARCHAR(100) UNIQUE,
-    Dirección VARCHAR(200)
+    Direccion VARCHAR(200)
 );
 
-CREATE TABLE SistemaVenta.Producto (
-    ID_Producto INT PRIMARY KEY,
-    Nombre VARCHAR(100),
-    Categoría VARCHAR(50),
-    Precio DECIMAL(10,2),
-    Stock INT,
+CREATE TABLE Producto (
+    ID_Producto INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre VARCHAR(100) NOT NULL,
+    Categoria VARCHAR(50),
+    Precio DECIMAL(10,2) NOT NULL,
+    Stock INT NOT NULL DEFAULT 0,
     ID_Proveedor INT,
-    FOREIGN KEY (ID_Proveedor) REFERENCES SistemaVenta.Proveedor(ID_Proveedor)
+    FOREIGN KEY (ID_Proveedor) REFERENCES Proveedor(ID_Proveedor)
 );
 
-CREATE TABLE SistemaVenta.Venta (
-    ID_Venta INT PRIMARY KEY,
-    Fecha DATETIME,
+CREATE TABLE Venta (
+    ID_Venta INT AUTO_INCREMENT PRIMARY KEY,
+    Fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     ID_Cliente INT,
     Total DECIMAL(10,2),
-    FOREIGN KEY (ID_Cliente) REFERENCES SistemaVenta.Cliente(ID_Cliente)
+    FOREIGN KEY (ID_Cliente) REFERENCES Cliente(ID_Cliente)
 );
 
-CREATE TABLE SistemaVenta.Detalle_Venta (
-    ID_Detalle INT PRIMARY KEY,
+CREATE TABLE DetalleVenta (
+    ID_Detalle INT AUTO_INCREMENT PRIMARY KEY,
     ID_Venta INT,
     ID_Producto INT,
-    Cantidad INT,
-    Subtotal DECIMAL(10,2),
-    FOREIGN KEY (ID_Venta) REFERENCES SistemaVenta.Venta(ID_Venta),
-    FOREIGN KEY (ID_Producto) REFERENCES SistemaVenta.Producto(ID_Producto)
+    Cantidad INT NOT NULL,
+    Subtotal DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (ID_Venta) REFERENCES Venta(ID_Venta),
+    FOREIGN KEY (ID_Producto) REFERENCES Producto(ID_Producto)
 );
