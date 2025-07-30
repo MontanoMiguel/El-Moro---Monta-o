@@ -1,6 +1,6 @@
-CREATE SCHEMA SistemaVenta;
-USE SistemaVenta;
+-- INSERCIÓN DE DATOS
 
+-- Proveedores
 INSERT INTO Proveedor (ID_Proveedor, Nombre, Telefono, Email) VALUES
 (1, 'Taller Jujuy', '11111111', 'jujuy@proveedor.com'),
 (2, 'Taller Salta', '22222222', 'salta@proveedor.com'),
@@ -13,6 +13,7 @@ INSERT INTO Proveedor (ID_Proveedor, Nombre, Telefono, Email) VALUES
 (9, 'Comercial Andina', '99999999', 'andina@proveedor.com'),
 (10, 'Proveedor Barro', '10101010', 'barro@proveedor.com');
 
+-- Clientes
 INSERT INTO Cliente (ID_Cliente, Nombre, Telefono, Email, Direccion) VALUES
 (1, 'Juan Pérez', '15151515', 'juan@example.com', 'Calle 1 #100'),
 (2, 'Ana Gómez', '25252525', 'ana@example.com', 'Calle 2 #200'),
@@ -25,7 +26,20 @@ INSERT INTO Cliente (ID_Cliente, Nombre, Telefono, Email, Direccion) VALUES
 (9, 'Diego Castro', '95959595', 'diego@example.com', 'Calle 9 #900'),
 (10, 'Valeria Silva', '10601060', 'valeria@example.com', 'Calle 10 #1000');
 
--- Asegurate de corregir los totales antes de insertar:
+-- Productos
+INSERT INTO Producto (ID_Producto, Nombre, Categoria, Precio, Stock, ID_Proveedor) VALUES
+(1, 'Olla de barro grande', 'Cocina', 75000.00, 10, 1),
+(2, 'Cazuela artesanal', 'Cocina', 80000.00, 20, 2),
+(3, 'Jarro esmaltado', 'Bebidas', 55000.00, 15, 3),
+(4, 'Fuente para horno', 'Cocina', 45000.00, 30, 4),
+(5, 'Taza de barro', 'Bebidas', 6000.00, 40, 5),
+(6, 'Maceta decorativa', 'Decoración', 9000.00, 25, 6),
+(7, 'Plato llano artesanal', 'Cocina', 30000.00, 35, 7),
+(8, 'Cenicero de barro', 'Decoración', 25000.00, 50, 8),
+(9, 'Mate de barro', 'Bebidas', 5000.00, 60, 9),
+(10, 'Cántaro de agua', 'Bebidas', 120000.00, 5, 10);
+
+-- Ventas
 INSERT INTO Venta (ID_Venta, Fecha, ID_Cliente, Total) VALUES
 (1, '2025-07-14 10:00:00', 1, 75000.00),
 (2, '2025-07-14 10:30:00', 2, 205000.00),
@@ -38,8 +52,8 @@ INSERT INTO Venta (ID_Venta, Fecha, ID_Cliente, Total) VALUES
 (9, '2025-07-14 14:00:00', 9, 9000.00),
 (10, '2025-07-14 14:30:00', 10, 45000.00);
 
--- Subtotales corregidos según precio x cantidad
-INSERT INTO DetalleVenta (ID_Detalle, ID_Venta, ID_Producto, Cantidad, Subtotal) VALUES
+-- Detalle de ventas
+INSERT INTO Detalle_Venta (ID_Detalle, ID_Venta, ID_Producto, Cantidad, Subtotal) VALUES
 (1, 1, 1, 1, 75000.00),
 (2, 2, 2, 2, 160000.00),
 (3, 2, 4, 1, 45000.00),
