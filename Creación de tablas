@@ -34,7 +34,7 @@ CREATE TABLE Venta (
     FOREIGN KEY (ID_Cliente) REFERENCES Cliente(ID_Cliente)
 );
 
-CREATE TABLE DetalleVenta (
+CREATE TABLE Detalle_Venta (
     ID_Detalle INT AUTO_INCREMENT PRIMARY KEY,
     ID_Venta INT,
     ID_Producto INT,
