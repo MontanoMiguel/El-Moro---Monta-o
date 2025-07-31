@@ -1,166 +1,102 @@
-USE SistemaVenta;
-GO
+-- =====================================
+--        VISTAS (VW)
+-- =====================================
 
--- =============================
--- VISTA 1: VentaDetallada
--- =============================
-CREATE VIEW SistemaVenta.VentaDetallada AS
-SELECT
-    V.ID_Venta,
-    V.Fecha,
-    C.Nombre AS Nombre_Cliente,
-    C.Email AS Email_Cliente,
-    P.Nombre AS Producto,
-    P.Categoría,
-    DV.Cantidad,
-    DV.Subtotal,
-    V.Total
-FROM SistemaVenta.Venta V
-JOIN SistemaVenta.Cliente C ON V.ID_Cliente = C.ID_Cliente
-JOIN SistemaVenta.Detalle_Venta DV ON V.ID_Venta = DV.ID_Venta
-JOIN SistemaVenta.Producto P ON DV.ID_Producto = P.ID_Producto
-WHERE P.Categoría IN ('Olla', 'Fuente', 'Plato')
-ORDER BY V.Fecha DESC;
-GO
+CREATE OR REPLACE VIEW VW_Productos_Stock_Bajo AS
+SELECT Nombre, Stock
+FROM Producto
+WHERE Stock < 15;
 
--- =============================
--- VISTA 2: StockBajo
--- =============================
-CREATE VIEW SistemaVenta.StockBajo AS
-SELECT
-    P.ID_Producto,
-    P.Nombre,
-    P.Categoría,
-    P.Stock,
-    PR.Nombre AS Proveedor,
-    PR.Email AS Email_Proveedor
-FROM SistemaVenta.Producto P
-JOIN SistemaVenta.Proveedor PR ON P.ID_Proveedor = PR.ID_Proveedor
-WHERE P.Stock < 5
-ORDER BY P.Stock ASC;
-GO
+CREATE OR REPLACE VIEW VW_Ventas_Clientes AS
+SELECT V.ID_Venta, C.Nombre AS Cliente, V.Fecha, V.Total
+FROM Venta V
+JOIN Cliente C ON V.ID_Cliente = C.ID_Cliente;
 
--- =============================
--- VISTA 3: VentaPorProducto
--- =============================
-CREATE VIEW SistemaVenta.VentaPorProducto AS
-SELECT
-    P.ID_Producto,
-    P.Nombre,
-    P.Categoría,
-    SUM(DV.Cantidad) AS UnidadesVendidas,
-    SUM(DV.Subtotal) AS TotalFacturado,
-    PR.Nombre AS Proveedor
-FROM SistemaVenta.Detalle_Venta DV
-JOIN SistemaVenta.Producto P ON DV.ID_Producto = P.ID_Producto
-JOIN SistemaVenta.Proveedor PR ON P.ID_Proveedor = PR.ID_Proveedor
-GROUP BY P.ID_Producto, P.Nombre, P.Categoría, PR.Nombre
-ORDER BY TotalFacturado DESC;
-GO
+CREATE OR REPLACE VIEW VW_Productos_Mas_Caros AS
+SELECT Nombre, Precio
+FROM Producto
+ORDER BY Precio DESC
+LIMIT 5;
 
--- =============================
--- FUNCIÓN 1: TotalVentaPorCliente
--- =============================
-CREATE FUNCTION SistemaVenta.TotalVentaPorCliente (@ID_Cliente INT)
+-- =====================================
+--        FUNCIONES (FN)
+-- =====================================
+
+DELIMITER //
+
+CREATE FUNCTION FN_CalcularSubtotal(precio DECIMAL(10,2), cantidad INT)
 RETURNS DECIMAL(10,2)
-AS
+DETERMINISTIC
 BEGIN
-    DECLARE @Total DECIMAL(10,2)
-
-    SELECT @Total = SUM(V.Total)
-    FROM SistemaVenta.Venta V
-    WHERE V.ID_Cliente = @ID_Cliente
-
-    RETURN ISNULL(@Total, 0)
+    RETURN precio * cantidad;
 END;
-GO
+//
 
--- =============================
--- FUNCIÓN 2: StockDeProducto
--- =============================
-CREATE FUNCTION SistemaVenta.StockDeProducto (@ID_Producto INT)
+CREATE FUNCTION FN_Stock_Disponible(idProd INT)
 RETURNS INT
-AS
+DETERMINISTIC
 BEGIN
-    DECLARE @StockActual INT
-
-    SELECT @StockActual = P.Stock
-    FROM SistemaVenta.Producto P
-    WHERE P.ID_Producto = @ID_Producto
-
-    RETURN ISNULL(@StockActual, 0)
+    DECLARE stockActual INT;
+    SELECT Stock INTO stockActual FROM Producto WHERE ID_Producto = idProd;
+    RETURN stockActual;
 END;
-GO
+//
 
--- =============================
--- PROCEDIMIENTO 1: RegistrarVentaCompleta
--- =============================
-CREATE PROCEDURE SistemaVenta.RegistrarVentaCompleta
-    @ID_Venta INT,
-    @Fecha DATETIME,
-    @ID_Cliente INT,
-    @Total DECIMAL(10,2),
-    @ID_Detalle INT,
-    @ID_Producto INT,
-    @Cantidad INT,
-    @Subtotal DECIMAL(10,2)
-AS
+DELIMITER ;
+
+-- =====================================
+--   PROCEDIMIENTOS ALMACENADOS (SP)
+-- =====================================
+
+DELIMITER //
+
+CREATE PROCEDURE SP_ActualizarStock (
+    IN p_id_producto INT,
+    IN p_cantidad INT
+)
 BEGIN
-    INSERT INTO SistemaVenta.Venta (ID_Venta, Fecha, ID_Cliente, Total)
-    VALUES (@ID_Venta, @Fecha, @ID_Cliente, @Total);
-
-    INSERT INTO SistemaVenta.Detalle_Venta (ID_Detalle, ID_Venta, ID_Producto, Cantidad, Subtotal)
-    VALUES (@ID_Detalle, @ID_Venta, @ID_Producto, @Cantidad, @Subtotal);
+    UPDATE Producto
+    SET Stock = Stock - p_cantidad
+    WHERE ID_Producto = p_id_producto;
 END;
-GO
+//
 
--- =============================
--- PROCEDIMIENTO 2: TotalVendidoPorCategoria
--- =============================
-CREATE PROCEDURE SistemaVenta.TotalVendidoPorCategoria
-    @Categoria VARCHAR(50)
-AS
+CREATE PROCEDURE SP_ListarVentasPorCliente (
+    IN p_id_cliente INT
+)
 BEGIN
-    SELECT 
-        @Categoria AS Categoria,
-        SUM(DV.Subtotal) AS TotalVendido
-    FROM SistemaVenta.Detalle_Venta DV
-    INNER JOIN SistemaVenta.Producto P ON DV.ID_Producto = P.ID_Producto
-    WHERE P.Categoría = @Categoria;
+    SELECT V.ID_Venta, V.Fecha, V.Total
+    FROM Venta V
+    WHERE V.ID_Cliente = p_id_cliente;
 END;
-GO
+//
 
--- =============================
--- TRIGGER 1: ActualizarStockTrasVenta
--- =============================
-CREATE TRIGGER SistemaVenta.ActualizarStockTrasVenta
-ON SistemaVenta.Detalle_Venta
-AFTER INSERT
-AS
-BEGIN
-    UPDATE P
-    SET Stock = Stock - i.Cantidad
-    FROM SistemaVenta.Producto P
-    INNER JOIN inserted i ON P.ID_Producto = i.ID_Producto;
-END;
-GO
+DELIMITER ;
 
--- =============================
--- TRIGGER 2: ControlEmailProveedor
--- =============================
-CREATE TRIGGER SistemaVenta.ControlEmailProveedor
-ON SistemaVenta.Proveedor
-FOR INSERT, UPDATE
-AS
+-- =====================================
+--             TRIGGERS (TR)
+-- =====================================
+
+DELIMITER //
+
+CREATE TRIGGER TR_ActualizarStockDespuesVenta
+AFTER INSERT ON Detalle_Venta
+FOR EACH ROW
 BEGIN
-    IF EXISTS (
-        SELECT 1
-        FROM inserted
-        WHERE Email IS NULL OR Email NOT LIKE '%@%'
-    )
-    BEGIN
-        RAISERROR ('Todos los proveedores deben tener un email válido con "@"', 16, 1);
-        ROLLBACK TRANSACTION;
-    END
+    UPDATE Producto
+    SET Stock = Stock - NEW.Cantidad
+    WHERE ID_Producto = NEW.ID_Producto;
 END;
-GO
+//
+
+CREATE TRIGGER TR_ActualizarTotalVenta
+AFTER INSERT ON Detalle_Venta
+FOR EACH ROW
+BEGIN
+    UPDATE Venta
+    SET Total = Total + NEW.Subtotal
+    WHERE ID_Venta = NEW.ID_Venta;
+END;
+//
+
+DELIMITER ;
