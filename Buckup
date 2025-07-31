@@ -1,0 +1,48 @@
+DROP SCHEMA IF EXISTS SistemaVentas;
+CREATE SCHEMA SistemaVentas;
+USE SistemaVentas;
+
+DROP TABLE IF EXISTS Detalle_Venta, Venta, Producto, Cliente, Proveedor;
+
+CREATE TABLE Proveedor (
+    ID_Proveedor INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre VARCHAR(100) NOT NULL,
+    Telefono VARCHAR(20),
+    Email VARCHAR(100) UNIQUE
+);
+
+CREATE TABLE Cliente (
+    ID_Cliente INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre VARCHAR(100) NOT NULL,
+    Telefono VARCHAR(20),
+    Email VARCHAR(100) UNIQUE,
+    Direccion VARCHAR(200)
+);
+
+CREATE TABLE Producto (
+    ID_Producto INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre VARCHAR(100) NOT NULL,
+    Categoria VARCHAR(50),
+    Precio DECIMAL(10,2) NOT NULL,
+    Stock INT NOT NULL DEFAULT 0,
+    ID_Proveedor INT,
+    FOREIGN KEY (ID_Proveedor) REFERENCES Proveedor(ID_Proveedor)
+);
+
+CREATE TABLE Venta (
+    ID_Venta INT AUTO_INCREMENT PRIMARY KEY,
+    Fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    ID_Cliente INT,
+    Total DECIMAL(10,2) DEFAULT 0.00,
+    FOREIGN KEY (ID_Cliente) REFERENCES Cliente(ID_Cliente)
+);
+
+CREATE TABLE Detalle_Venta (
+    ID_Detalle INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Venta INT,
+    ID_Producto INT,
+    Cantidad INT NOT NULL,
+    Subtotal DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (ID_Venta) REFERENCES Venta(ID_Venta),
+    FOREIGN KEY (ID_Producto) REFERENCES Producto(ID_Producto)
+);
