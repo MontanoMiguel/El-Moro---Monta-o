@@ -1,7 +1,13 @@
+-- =====================================
+-- BACKUP GENERAL COMPLETO - SISTEMA DE VENTAS
+-- =====================================
 DROP SCHEMA IF EXISTS SistemaVentas;
 CREATE SCHEMA SistemaVentas;
 USE SistemaVentas;
 
+-- ========================
+-- TABLAS
+-- ========================
 DROP TABLE IF EXISTS Detalle_Venta, Venta, Producto, Cliente, Proveedor;
 
 CREATE TABLE Proveedor (
@@ -46,3 +52,153 @@ CREATE TABLE Detalle_Venta (
     FOREIGN KEY (ID_Venta) REFERENCES Venta(ID_Venta),
     FOREIGN KEY (ID_Producto) REFERENCES Producto(ID_Producto)
 );
+
+-- ========================
+-- INSERCIÓN DE DATOS
+-- ========================
+
+INSERT INTO Proveedor (Nombre, Telefono, Email) VALUES
+('Taller Jujuy', '11111111', 'jujuy@proveedor.com'),
+('Taller Salta', '22222222', 'salta@proveedor.com'),
+('Taller San Luis', '33333333', 'sanluis@proveedor.com'),
+('Taller Tucuman', '44444444', 'tucuman@proveedor.com'),
+('Taller La Rioja', '55555555', 'larioja@proveedor.com'),
+('Taller Formosa', '66666666', 'formosa@proveedor.com'),
+('Mamani', '77777777', 'mamani@proveedor.com'),
+('Tienda Quebracho', '88888888', 'quebracho@proveedor.com'),
+('Comercial Andina', '99999999', 'andina@proveedor.com'),
+('Proveedor Barro', '10101010', 'barro@proveedor.com');
+
+INSERT INTO Cliente (Nombre, Telefono, Email, Direccion) VALUES
+('Juan Pérez', '15151515', 'juan@example.com', 'Calle 1 #100'),
+('Ana Gómez', '25252525', 'ana@example.com', 'Calle 2 #200'),
+('Carlos López', '35353535', 'carlos@example.com', 'Calle 3 #300'),
+('Laura Díaz', '45454545', 'laura@example.com', 'Calle 4 #400'),
+('Pedro Sánchez', '55555555', 'pedro@example.com', 'Calle 5 #500'),
+('Sofía Morales', '65656565', 'sofia@example.com', 'Calle 6 #600'),
+('Martín Torres', '75757575', 'martin@example.com', 'Calle 7 #700'),
+('Elena Ruiz', '85858585', 'elena@example.com', 'Calle 8 #800'),
+('Diego Castro', '95959595', 'diego@example.com', 'Calle 9 #900'),
+('Valeria Silva', '10601060', 'valeria@example.com', 'Calle 10 #1000');
+
+INSERT INTO Producto (Nombre, Categoria, Precio, Stock, ID_Proveedor) VALUES
+('Jarra de barro', 'Vajilla', 75000.00, 10, 1),
+('Cazuela', 'Cocina', 80000.00, 20, 2),
+('Olla de barro', 'Cocina', 55000.00, 15, 3),
+('Plato decorativo', 'Decoración', 45000.00, 12, 4),
+('Florero', 'Decoración', 6000.00, 30, 5),
+('Maceta chica', 'Jardín', 9000.00, 25, 6),
+('Cenicero artesanal', 'Decoración', 30000.00, 10, 7),
+('Cuenco ceremonial', 'Ritual', 25000.00, 8, 8),
+('Taza rústica', 'Vajilla', 7000.00, 30, 9),
+('Anforita decorativa', 'Decoración', 120000.00, 5, 10);
+
+INSERT INTO Venta (Fecha, ID_Cliente, Total) VALUES
+('2025-07-14 10:00:00', 1, 75000.00),
+('2025-07-14 10:30:00', 2, 205000.00),
+('2025-07-14 11:00:00', 3, 6000.00),
+('2025-07-14 11:30:00', 4, 120000.00),
+('2025-07-14 12:00:00', 5, 30000.00),
+('2025-07-14 12:30:00', 6, 55000.00),
+('2025-07-14 13:00:00', 7, 25000.00),
+('2025-07-14 13:30:00', 8, 80000.00),
+('2025-07-14 14:00:00', 9, 9000.00),
+('2025-07-14 14:30:00', 10, 45000.00);
+
+INSERT INTO Detalle_Venta (ID_Venta, ID_Producto, Cantidad, Subtotal) VALUES
+(1, 1, 1, 75000.00),
+(2, 2, 2, 160000.00),
+(2, 4, 1, 45000.00),
+(3, 5, 1, 6000.00),
+(4, 10, 1, 120000.00),
+(5, 7, 1, 30000.00),
+(6, 3, 1, 55000.00),
+(7, 8, 1, 25000.00),
+(8, 2, 1, 80000.00),
+(9, 6, 1, 9000.00);
+
+-- ========================
+-- VISTAS
+-- ========================
+CREATE OR REPLACE VIEW VW_Productos_Stock_Bajo AS
+SELECT Nombre, Stock FROM Producto WHERE Stock < 15;
+
+CREATE OR REPLACE VIEW VW_Ventas_Clientes AS
+SELECT V.ID_Venta, C.Nombre AS Cliente, V.Fecha, V.Total
+FROM Venta V
+JOIN Cliente C ON V.ID_Cliente = C.ID_Cliente;
+
+CREATE OR REPLACE VIEW VW_Productos_Mas_Caros AS
+SELECT Nombre, Precio FROM Producto ORDER BY Precio DESC LIMIT 5;
+
+-- ========================
+-- FUNCIONES
+-- ========================
+DELIMITER //
+CREATE FUNCTION FN_CalcularSubtotal(precio DECIMAL(10,2), cantidad INT)
+RETURNS DECIMAL(10,2)
+DETERMINISTIC
+BEGIN
+    RETURN precio * cantidad;
+END;
+//
+
+CREATE FUNCTION FN_Stock_Disponible(idProd INT)
+RETURNS INT
+DETERMINISTIC
+BEGIN
+    DECLARE stockActual INT;
+    SELECT Stock INTO stockActual FROM Producto WHERE ID_Producto = idProd;
+    RETURN stockActual;
+END;
+//
+DELIMITER ;
+
+-- ========================
+-- PROCEDIMIENTOS
+-- ========================
+DELIMITER //
+CREATE PROCEDURE SP_ActualizarStock(
+    IN p_id_producto INT,
+    IN p_cantidad INT
+)
+BEGIN
+    UPDATE Producto SET Stock = Stock - p_cantidad
+    WHERE ID_Producto = p_id_producto;
+END;
+//
+
+CREATE PROCEDURE SP_ListarVentasPorCliente(
+    IN p_id_cliente INT
+)
+BEGIN
+    SELECT ID_Venta, Fecha, Total
+    FROM Venta
+    WHERE ID_Cliente = p_id_cliente;
+END;
+//
+DELIMITER ;
+
+-- ========================
+-- TRIGGERS
+-- ========================
+DELIMITER //
+CREATE TRIGGER TR_ActualizarStockDespuesVenta
+AFTER INSERT ON Detalle_Venta
+FOR EACH ROW
+BEGIN
+    UPDATE Producto SET Stock = Stock - NEW.Cantidad
+    WHERE ID_Producto = NEW.ID_Producto;
+END;
+//
+
+CREATE TRIGGER TR_ActualizarTotalVenta
+AFTER INSERT ON Detalle_Venta
+FOR EACH ROW
+BEGIN
+    UPDATE Venta SET Total = Total + NEW.Subtotal
+    WHERE ID_Venta = NEW.ID_Venta;
+END;
+//
+DELIMITER ;
+
